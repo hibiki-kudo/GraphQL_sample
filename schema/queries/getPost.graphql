@@ -1,0 +1,4 @@
+extend type Query {
+    getPostAll: [Post]!
+    getPostById(id: Int!): Post
+}
