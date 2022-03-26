@@ -6,7 +6,6 @@
 - [触ってみた感想](#触ってみた感想)
 - [参考](#参考)
 
-
 ## GraphQLとは
 facebookによって作成されたWebAPI仕様 → RESTful APIやSOAP(gRPC)といった通信時のAPIのルールのひとつ
 
@@ -29,7 +28,7 @@ facebookによって作成されたWebAPI仕様 → RESTful APIやSOAP(gRPC)と�
 - query
 - mutation
 ### type
-GraphQLで扱うデータのschemaを定義する。
+GraphQLで扱うデータのschemaを定義。
 
 ```graphql
 type Post {
@@ -40,11 +39,12 @@ type Post {
 
 type Query
 
-type Mutatio
+type Mutation
+
 ```
 
 ### query
-GraphQLで扱うデータを取得するためのschemaを定義する。
+GraphQLで扱うデータを取得するためのschemaを定義。HTTPメソッドで言うGET。
 
 ```graphql
 extend type Query {
@@ -54,7 +54,7 @@ extend type Query {
 ```
 
 ### mutation
-GraphQLで扱うデータを操作するためのschemaを定義する。
+GraphQLで扱うデータを操作するためのschemaを定義。HTTPメソッドで言うPOST, PUT, DELETE。
 
 ```graphql
 extend type Mutation {
@@ -67,13 +67,14 @@ extend type Mutation {
 <br>
 ![architecture.png](architecture.png)
 
-※ 今回のサンプルではexpressでの実装を行っています。また、具体的な実装はgraphql code generatorで自動作成しています。
+※ 今回のサンプルではexpressでの実装を行っています。
 
 ### graphql code generator
-graphql code generatorのよってschemaから自動的にリゾルバとクライアントを作成してくれます。
+graphql code generatorのよってschemaから自動的にresolverで必要な型定義を作成してくれます。
+※ もちろんフロントエンドからリクエストする際のclient側の型定義も自動的に行ってくれます。
 
 ### サーバーの設定
-codegen.ymlを作成する。
+自動生成用のcodegen.ymlを作成します。
 ```yml
 overwrite: true
 schema: "../schema/**/*.graphql"
@@ -88,24 +89,65 @@ generates:
       - "typescript-operations"
 
 ```
-codegen.ymlを作成したら、コマンドからリゾルバで扱う型定義を自動生成します。
+codegen.ymlを作成したら、コマンドからresolverで扱う型定義を自動生成します。
 
 ```shell
+$ yarn install
 $ yarn graphql-codegen --config codegen.yml
 ```
 
 ### リクエストしてみる
-GraphQLではエンドポイントは一つのみです。
+GraphQLではエンドポイントは一つのみです。サーバー起動がurlをブラウザからアクセスするとgraphqlのリクエストを検証することができます。
+```shell
+$ yarn dev 
+# http://localhost:4000/graphql にアクセスする
 ```
-http://localhost:4000/graphql
+
+#### queryの場合
+以下の内容を左側のエディター部分に入力して実行。
+```graphql
+query {
+  getPostAll {
+    id
+    title
+    content
+  }
+}
+```
+```graphql
+query {
+  getPostById(id: 2) {
+    id
+    title
+    content
+  }
+}
+```
+
+#### mutationの場合
+queryと同様に以下を入力して実行。
+```graphql
+mutation {
+  createPost(title: "sample04", content: "<h2>sample04</h2>") {
+    id
+    title
+    content
+  }
+}
+```
+
+```graphql
+mutation {
+  deletePost(id: 1)
+}
 ```
 
 ## 触ってみた感想
-- schemaさえ作成してしまえば、フロントエンド・バックエンドの実装順序による依存がなくなってとても良い。
+- schemaさえ作成してしまえば、フロントエンド・バックエンドの実装による依存がなくなってとても良い。
 - エンドポイントが一つなので、複数クライアントがある場合等ではURLの管理が楽に感じた。
 - エコシステムがとても強力
   - typescriptでの実装の場合、schemaで扱うデータの型補完がよく効くので実装がとても楽だった。
-  - バックエンド・フロントエンド両方に対してリクエスト・レスポンスで必要な型定義をschemaから自動生成してくれてschema変更したあとの対応が少ないように感じた。
+  - バックエンド・フロントエンド両方に対してリクエスト・レスポンスで必要な型定義をschemaから自動生成してくれてschema変更したあとのバグ検知がしやすいように感じた。
 
 ## 参考
 - GraphQLが解決する問題とその先のユースケース<br>
