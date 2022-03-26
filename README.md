@@ -31,45 +31,67 @@ facebookによって作成されたWebAPI仕様 → RESTful APIやSOAP(gRPC)と�
 ### type
 GraphQLで扱うデータのschemaを定義する。
 
-[//]: # (定義例を書く)
+```graphql
+type Post {
+  id: Int!
+  title: String!
+  content: String
+}
+
+type Query
+
+type Mutatio
+```
 
 ### query
 GraphQLで扱うデータを取得するためのschemaを定義する。
 
-[//]: # (定義例を書く)
+```graphql
+extend type Query {
+    getPostAll: [Post]!
+    getPostById(id: Int!): Post
+}
+```
 
 ### mutation
 GraphQLで扱うデータを操作するためのschemaを定義する。
 
-[//]: # (定義例を書く)
+```graphql
+extend type Mutation {
+  deletePost(id: Int!): Boolean!
+}
+```
 
 ## 実装例
 全体構成の雰囲気は以下のようなかんじです。schema.graphqlの実装をサーバー側はresolverによって行い、クライアント側はclientによって行っています。
 <br>
 ![architecture.png](architecture.png)
 
-※ 今回のサンプルではexpress + next.jsでの実装を行っています。また、具体的な実装はgraphql code generatorで自動作成しています。
+※ 今回のサンプルではexpressでの実装を行っています。また、具体的な実装はgraphql code generatorで自動作成しています。
 
 ### graphql code generator
 graphql code generatorのよってschemaから自動的にリゾルバとクライアントを作成してくれます。
 
-### バックエンド
-codegen.ymlを作成したら、コマンドからリゾルバを自動生成します。
+### サーバーの設定
+codegen.ymlを作成する。
+```yml
+overwrite: true
+schema: "../schema/**/*.graphql"
+documents: null
+generates:
+  src/generated/graphql.ts:
+    config:
+      useIndexSignature: true
+    plugins:
+      - "typescript"
+      - "typescript-resolvers"
+      - "typescript-operations"
 
-[//]: # (ymlの定義例を書く)
 ```
-$ 
-```
+codegen.ymlを作成したら、コマンドからリゾルバで扱う型定義を自動生成します。
 
-### フロントエンド
-queryやmutationと紐付けるためのschemaをフロント側独自に定義する必要があるので定義する。
-
-[//]: # (定義例を書く)
-定義後、codegen.ymlを作成してコマンドからクライアントを自動生成します。
-
-[//]: # (ymlの定義例を書く)
-```
-$ 
+```shell
+$ yarn graphql-codegen --config codegen.yml
 ```
 
 ### リクエストしてみる
@@ -83,7 +105,7 @@ http://localhost:4000/graphql
 - エンドポイントが一つなので、複数クライアントがある場合等ではURLの管理が楽に感じた。
 - エコシステムがとても強力
   - typescriptでの実装の場合、schemaで扱うデータの型補完がよく効くので実装がとても楽だった。
-  - バックエンド・フロントエンド両方に対してリクエスト・レスポンス処理をschemaから自動生成してくれてschema変更したあとの対応が少ないように感じた。
+  - バックエンド・フロントエンド両方に対してリクエスト・レスポンスで必要な型定義をschemaから自動生成してくれてschema変更したあとの対応が少ないように感じた。
 
 ## 参考
 - GraphQLが解決する問題とその先のユースケース<br>

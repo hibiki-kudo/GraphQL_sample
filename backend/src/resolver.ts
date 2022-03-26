@@ -28,6 +28,15 @@ const Query: QueryResolvers = {
 };
 
 export const Mutation: MutationResolvers = {
+    createPost: (_, {title, content}) => {
+        const post = {
+            id: Posts.length + 1,
+            title: title,
+            content: content || ""
+        }
+        Posts.push(post)
+        return post
+    },
     deletePost: (_, {id}) => {
         try {
             const postLength = Posts.length

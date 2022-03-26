@@ -16,7 +16,14 @@ export type Scalars = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createPost?: Maybe<Post>;
   deletePost: Scalars['Boolean'];
+};
+
+
+export type MutationCreatePostArgs = {
+  content?: InputMaybe<Scalars['String']>;
+  title: Scalars['String'];
 };
 
 
@@ -131,6 +138,7 @@ export type ResolversParentTypes = ResolversObject<{
 }>;
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  createPost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationCreatePostArgs, 'title'>>;
   deletePost?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeletePostArgs, 'id'>>;
 }>;
 
