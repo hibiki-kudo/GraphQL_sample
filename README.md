@@ -7,7 +7,7 @@
 - [参考](#参考)
 
 ## GraphQLとは
-facebookによって作成されたWebAPI仕様 → RESTful APIやSOAP(gRPC)といった通信時のAPIのルールのひとつ
+facebookによって作成されたWebAPI仕様 → RESTful APIやSOAP(gRPC)といった通信時のAPIルールのひとつ
 
 ## REATful APIとの違い
 ### RESTful API
@@ -18,15 +18,21 @@ facebookによって作成されたWebAPI仕様 → RESTful APIやSOAP(gRPC)と�
 
 ### GraphQL
 - URLが一つに対して操作対象が複数
-- HTTPメソッドはpostのみ
+- HTTPメソッドはpostのみで操作自体の決定はschemaによって決まる
 - application/jsonの他にapplication/graphqlもある
 - schemaによるリクエスト・レスポンスの仕様管理
 
 ## schemaの書き方
-以下の構成からなるschemaを作成する。
+GraphQLはschema駆動開発に基づいた形でAPI設計を行います。
+<br>
+schema駆動開発とは、最初にschemaと言われるAPI上で扱われるデータ形式のルール(インターフェース)を決めて、その形式に沿ってフロントエンド・バックエンドが実装を行っていく開発手法です。
+<br>
+<br>
+GraphQLではざっくりと以下のschemaを扱います。
 - type
 - query
 - mutation
+
 ### type
 GraphQLで扱うデータのschemaを定義。
 
@@ -63,18 +69,17 @@ extend type Mutation {
 ```
 
 ## 実装例
-全体構成の雰囲気は以下のようなかんじです。schema.graphqlの実装をサーバー側はresolverによって行い、クライアント側はclientによって行っています。
+全体構成の雰囲気は以下のようなかんじです。schemaの具体的な実装をサーバー側はresolverによって行い、クライアント側はclientによって行っています。
 <br>
 ![architecture.png](architecture.png)
 
-※ 今回のサンプルではexpressでの実装を行っています。
-
-### graphql code generator
-graphql code generatorのよってschemaから自動的にresolverで必要な型定義を作成してくれます。
+### graphql-code-generator
+[graphql-code-generator](https://github.com/dotansimha/graphql-code-generator) によってschemaから自動的にresolverで必要な型定義を作成してくれます。
 ※ もちろんフロントエンドからリクエストする際のclient側の型定義も自動的に行ってくれます。
 
 ### サーバーの設定
-自動生成用のcodegen.ymlを作成します。
+自動生成の設定用codegen.ymlを作成します。
+※ 今回のサンプルではexpressでの実装を行っています。
 ```yml
 overwrite: true
 schema: "../schema/**/*.graphql"
@@ -92,13 +97,19 @@ generates:
 codegen.ymlを作成したら、コマンドからresolverで扱う型定義を自動生成します。
 
 ```shell
+# ./backend
 $ yarn install
 $ yarn graphql-codegen --config codegen.yml
 ```
 
+#### resolverの設定
+queryとmutationとして作成したschemaに基づく形で、実際の処理はここで実装する。(controllerに近いようなもの)<br>
+[実装したファイル](https://github.com/hibiki-kudo/GraphQL_sample/blob/master/backend/src/resolver.ts) を参照。
+
 ### リクエストしてみる
 GraphQLではエンドポイントは一つのみです。サーバー起動がurlをブラウザからアクセスするとgraphqlのリクエストを検証することができます。
 ```shell
+# ./backend
 $ yarn dev 
 # http://localhost:4000/graphql にアクセスする
 ```
@@ -152,5 +163,7 @@ mutation {
 ## 参考
 - GraphQLが解決する問題とその先のユースケース<br>
 https://zenn.dev/saboyutaka/articles/07f1351a6b0049
+- スキーマ駆動開発、はじめました - stmn tech blog<br> 
+https://tech.stmn.co.jp/entry/2021/08/30/132428
 - GraphQL Code Generator で TypeScript の型を自動生成する<br>
 https://techlife.cookpad.com/entry/2021/03/24/123214
